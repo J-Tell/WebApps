@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignments</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script> 
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        body {
+            background-color: #e6c77a;
+        }
+        h1 {
+            color: #2b4b82;
+        }
+        h2 {
+            color: #5594ab;
+        }
+        th {
+            color: #4c80d9;
+        }
+        td {
+            color: #0a1680;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>List of Assignments</h1>
+        <table>
+            <tr>
+                <th>Assignment</th>
+                <th>Due Date</th>
+            </th>
+            <tr>
+                <td>Chem Webassign</td>
+                <td>1/9/23</td>
+                <td>
+                    <a class="btn-small waves-effect waves-light" href="stuff.html">
+                        <i class="material-icons right">edit</i>
+                        Edit
+                    </a>
+                    <a class="btn-small waves-effect waves-light red">
+                        <i class="material-icons right">delete</i>
+                        Delete
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td>Infix Calculator</td>
+                <td>1/6/23</td>
+                <td>
+                    <a class="btn-small waves-effect waves-light" href="stuff.html">
+                        <i class="material-icons right">edit</i>
+                        Edit
+                    </a>
+                    <a class="btn-small waves-effect waves-light red">
+                        <i class="material-icons right">delete</i>
+                        Delete
+                    </a>
+                </td>
+            </tr>
+                <div class="section">
+                    <a class="btn-small waves-effect waves-light" href="index.html">Home Page</a>
+                </div>
+        </table>
+    </div>
+
+    <div class="container">
+
+        <div class="section">
+            <h2>Add Assignment:</h2>
+            <form>
+                <div class="row">
+                    <div class="input-field col s6">
+                        <label for="nameInput">Assignment Name:</label>
+                        <input type="text" name="name" id="nameInput" class="validate" data-length="32" required>
+                    </div>
+                    <div class="input-field col s6">
+                        <label for="quantityInput">Date Due:</label>
+                        <input type="text" class="datepicker">
+                    </div>
+                </div>
+                <button class="btn waves-effect waves-light" type="submit">
+                    <i class="material-icons right">send</i>
+                    Submit
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script> M.AutoInit();</script>
+
+</body>
+</html>
