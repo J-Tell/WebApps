@@ -33,10 +33,12 @@
             <tr>
                 <th>Assignment</th>
                 <th>Due Date</th>
+                <th>Class</th>
             </th>
             <tr>
                 <td>Chem Webassign</td>
                 <td>1/9/23</td>
+                <td>Chemistry</td>
                 <td>
                     <a class="btn-small waves-effect waves-light" href="stuff.html">
                         <i class="material-icons right">edit</i>
@@ -51,6 +53,7 @@
             <tr>
                 <td>Infix Calculator</td>
                 <td>1/6/23</td>
+                <td>AP CompSci</td>
                 <td>
                     <a class="btn-small waves-effect waves-light" href="stuff.html">
                         <i class="material-icons right">edit</i>
@@ -80,13 +83,19 @@
                     </div>
                     <div class="input-field col s6">
                         <label for="quantityInput">Date Due:</label>
-                        <input type="text" class="datepicker">
+                        <input type="text" class="datepicker"> 
+                    </div>
+                    <div class="input-field col s6">
+                        <label for="nameInput">Class Name:</label>
+                        <input type="text" name="name" id="nameInput" class="validate" data-length="32" required>
                     </div>
                 </div>
-                <button class="btn waves-effect waves-light" type="submit">
-                    <i class="material-icons right">send</i>
-                    Submit
-                </button>
+                <div style="text-align: center">
+                    <button class="btn waves-effect waves-light" type="submit" >
+                        <i class="material-icons right">send</i>
+                        Submit
+                    </button>
+                </div>
             </form>
         </div>
     </div>
