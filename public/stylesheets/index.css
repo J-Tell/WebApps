@@ -1,0 +1,21 @@
+
+/* <link rel="shortcut icon" type="image/jpg" href="Favicon_Image_Location"/> */
+
+body {
+    background-color:#aae1f2;
+}
+h1 {
+    color: #f261cb;
+}
+h2 {
+    color: #af8cbf;
+}
+img {
+    height: 200px;
+    width: 200px;
+}
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
