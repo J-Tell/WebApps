@@ -12,7 +12,7 @@ const create_stuff_table_sql = `
     CREATE TABLE stuff (
         id INT NOT NULL AUTO_INCREMENT,
         item VARCHAR(45) NOT NULL,
-        due_date INT NOT NULL,
+        due_date VARCHAR(45) NOT NULL,
         description VARCHAR(150) NULL,
         PRIMARY KEY (id)
     );
@@ -28,13 +28,13 @@ const insert_stuff_table_sql = `
     VALUES 
         (?, ?, ?);
 `
-db.execute(insert_stuff_table_sql, ['Widgets', '5', 'Widgets are cool! You can do ... so many... different things... with them...']);
+db.execute(insert_stuff_table_sql, ['Chem Webassign', '1/9/23', 'Chemistry']);
 
-db.execute(insert_stuff_table_sql, ['Gizmos', '100', null]);
+db.execute(insert_stuff_table_sql, ['Infix Calculator', '1/6/23', 'AP CompSci']);
 
-db.execute(insert_stuff_table_sql, ['Thingamajig', '12345', 'Not to be confused with a Thingamabob']);
+db.execute(insert_stuff_table_sql, ['Gatsby Essay', '2/3/23', 'AmerLit']);
 
-db.execute(insert_stuff_table_sql, ['Thingamabob', '54321', 'Not to be confused with a Thingamajig']);
+db.execute(insert_stuff_table_sql, ['American Revolution Presentation', '2/10/23', 'History']);
 
 const read_stuff_table_sql = "SELECT * FROM stuff";
 
