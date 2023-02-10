@@ -28,7 +28,7 @@
     <div class="container">
         <div class="section flow-text" id="stuffDetail">
             <h1>Assignment Details:</h1>
-            <a class="btn-small waves-effect waves-light" href="/views/list.ejs">Full List
+            <a class="btn-small waves-effect waves-light" href="/list">Full List
                 <i class="material-icons left">arrow_back</i>
             </a>
             <table>
@@ -39,19 +39,14 @@
                 <tr>
                     <th>Due Date:</th>
                     <td><%=due_date%></td>
-
                 </tr>
                 <tr>
                     <th>Class:</th>
-                    <td>
-                        <%=description%>
-                    </td>
+                    <td><%=classes%></td>
                 </tr>
                 <tr>
                     <th>Description:</th>
-                    <td>
-                        Help!!! Chem!!!
-                    </td>
+                    <td><%=description%></td>
                 </tr>
             </table>
         </div>
@@ -61,36 +56,36 @@
                 <i class="material-icons right">edit</i>
                 Edit
             </a>
-            <a class="btn-large waves-effect waves-light red right">
+            <a class="btn-large waves-effect waves-light red right" href="/list/stuff/<%=id%>/delete">
                 <i class="material-icons right">delete</i>
                 Delete
             </a>
         </div>
-
 
         <div class="modal" id="stuffEdit">
 
             <div class="modal-content">
 
                 <h2>Edit Assignment:</h2>
-                <form>
+                <form method="post" action="/list/stuff/<%=id%>"> <!-- default action is the page's URL --> 
                     <div class="row">
                         <div class="input-field col s6">
                             <label for="nameInput">Assignment Name:</label>
-                            <input type="text" name="name" id="nameInput" class="validate" data-length="32" required>
+                            <input type="text" name="homework_name" id="nameInput" class="validate" value="<%=item%>" data-length="32" required>
                         </div>
                         <div class="input-field col s6">
-                            <input type="date">
+                            <label for="quantityInput">Date Due:</label>
+                            <input type="date" name="assignment_date" value="<%=due_date%>" data-length="32" required> 
                         </div>
                         <div class="input-field col s6">
                             <label for="nameInput">Class Name:</label>
-                            <input type="text" name="name" id="nameInput" class="validate" data-length="32" required>
+                            <input type="text" name="class_name" id="nameInput" class="validate" value="<%=classes%>" data-length="32" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="input-field col s12">
                             <label for="descriptionInput">Assignment Description:</label>
-                            <input type="text" name="description" id="descriptionInput" data-length="100">
+                            <input type="text" name="class_description" id="descriptionInput" value="<%=description%>" data-length="100">
                         </div>
                     </div>
                     <div class="modal-footer">
