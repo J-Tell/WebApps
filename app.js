@@ -12,6 +12,35 @@ app.use(logger("dev")); // ??
 // define middleware that serves static resources in the public directory
 app.use(express.static(__dirname + '/public')); // ??
 
+const { auth } = require('express-openid-connect');
+const dotenv = require('dotenv');
+dotenv.config();
+
+
+// // Helmet middleware
+// app.use(helmet({...
+// });
+
+// CODE FROM AUTH0:
+const config = {
+    authRequired: false,
+    auth0Logout: true,
+    secret: process.env.AUTH0_SECRET,
+    baseURL: process.env.AUTH0_BASE_URL,
+    clientID: process.env.AUTH0_CLIENT_ID,
+    issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL
+  };
+
+// auth router attaches /login, /logout, and /callback routes to the baseURL
+app.use(auth(config));
+
+// Rest of the app.use(...) middleware
+
+// req.isAuthenticated is provided from the auth router
+app.get('/authtest', (req, res) => {
+  res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
+});
+
 app.use( express.urlencoded({ extended: false }) );
 
 
@@ -19,6 +48,8 @@ app.use( express.urlencoded({ extended: false }) );
 app.listen( port, () => {
     console.log(`App server listening on ${ port }. (Go to http://localhost:${ port })` );
 } );
+
+
 
 // define middleware that logs all incoming requests
 app.use((req, res, next) => {
