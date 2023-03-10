@@ -14,7 +14,7 @@ const create_stuff_table_sql = `
         due_date VARCHAR(45) NOT NULL,
         classes VARCHAR(45) NOT NULL,
         description VARCHAR(150) NULL,
-        user_id VARCHAR (50) NULL;
+        user_id VARCHAR (50) NULL,
         PRIMARY KEY (id)
     );
 `

@@ -6,7 +6,6 @@ const logger = require("morgan");
 const helmet = require("helmet");
 const {auth} = require('express-openid-connect');
 const {requiresAuth} = require('express-openid-connect');
-
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -19,11 +18,15 @@ app.use(logger("dev")); // ??
 // define middleware that serves static resources in the public directory
 app.use(express.static(__dirname + '/public')); // ??
 
+app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", 'cdnjs.cloudflare.com'],
+      }
+    }
+  })); 
 
-
-// // Helmet middleware
-// app.use(helmet({...
-// });
 const config = {
   authRequired: false,
   auth0Logout: true,
@@ -185,7 +188,7 @@ const create_item_sql = `
         (?, ?, ?, ?, ?)
 `
 app.post("/list", requiresAuth(), ( req, res ) => {
-    db.execute(create_item_sql, [req.body.homework_name, req.body.assignment_date, req.body.class_name, req.body.class_description, req.oidc.user_id], (error, results) => {
+    db.execute(create_item_sql, [req.body.homework_name, req.body.assignment_date, req.body.class_name, req.body.class_description, req.oidc.user.email], (error, results) => {
         if (error)
             res.status(500).send(error); //Internal Server Error
         else {
