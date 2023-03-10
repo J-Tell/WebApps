@@ -3,6 +3,10 @@ const express = require( "express" );
 const app = express();
 const port = 9145;
 const logger = require("morgan");
+const helmet = require("helmet");
+const {auth} = require('express-openid-connect');
+const {requiresAuth} = require('express-openid-connect');
+
 const db = require("./db/db_connection");
 app.set("views", __dirname + "/views");
 app.set("view engine", "ejs");
@@ -12,7 +16,6 @@ app.use(logger("dev")); // ??
 // define middleware that serves static resources in the public directory
 app.use(express.static(__dirname + '/public')); // ??
 
-const { auth } = require('express-openid-connect');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -20,19 +23,25 @@ dotenv.config();
 // // Helmet middleware
 // app.use(helmet({...
 // });
-
-// CODE FROM AUTH0:
 const config = {
-    authRequired: false,
-    auth0Logout: true,
-    secret: process.env.AUTH0_SECRET,
-    baseURL: process.env.AUTH0_BASE_URL,
-    clientID: process.env.AUTH0_CLIENT_ID,
-    issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL
-  };
+  authRequired: false,
+  auth0Logout: true,
+  secret: process.env.AUTH0_SECRET,
+  baseURL: process.env.AUTH0_BASE_URL,
+  clientID: process.env.AUTH0_CLIENT_ID,
+  issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL 
+};
 
 // auth router attaches /login, /logout, and /callback routes to the baseURL
 app.use(auth(config));
+
+
+app.use((req, res, next) => {
+    res.locals.isLoggedIn = req.oidc.isAuthenticated();
+    res.locals.user = req.oidc.user;
+
+    next();
+})
 
 // Rest of the app.use(...) middleware
 
@@ -40,9 +49,17 @@ app.use(auth(config));
 app.get('/authtest', (req, res) => {
   res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
 });
+// const { requiresAuth } = require('express-openid-connect');
+
+app.get('/profile', requiresAuth(), (req, res) => {
+  res.send(JSON.stringify(req.oidc.user));
+});
+
+app.get('/', (req, res) => {
+    res.render('index')
+});
 
 app.use( express.urlencoded({ extended: false }) );
-
 
 // start the server
 app.listen( port, () => {
@@ -58,7 +75,7 @@ app.use((req, res, next) => {
 } );
 
 // define a route for the default home page
-app.get( "/", ( req, res ) => {
+app.get( "/", requiresAuth(), ( req, res ) => {
     // res.sendFile( __dirname + "/views/index.html" );
     res.render("index");
 } );
@@ -68,11 +85,13 @@ SELECT
     id, item, due_date
 FROM
     stuff
+WHERE
+    user_id = ?
 `
 
 // define a route for the stuff inventory page
-app.get( "/list", ( req, res ) => {
-    db.execute(read_stuff_all_sql, (error,results) => {
+app.get( "/list", requiresAuth(), ( req, res ) => {
+    db.execute(read_stuff_all_sql, [req.oidc.user.email], (error,results) => {
         if (error) {
             res.status(500).send(error); //Internal Server Error
         }
@@ -90,10 +109,12 @@ FROM
     stuff
 WHERE
     id = ?
+AND
+    user_id = ?
 `
 
 // define a route for the item detail page
-app.get( "/list/stuff/:id", ( req, res ) => {
+app.get( "/list/stuff/:id", requiresAuth(), ( req, res ) => {
     db.execute(read_item_sql, [req.params.id], (error, results) => {
         if (error) {
             res.status(500).send(error); //Internal Server Error
@@ -110,9 +131,6 @@ app.get( "/list/stuff/:id", ( req, res ) => {
     // res.sendFile( __dirname + "/views/stuff.html" );
 } );
 
-
-
-
 // define a route for item DELETE
 const delete_item_sql = `
     DELETE 
@@ -120,9 +138,11 @@ const delete_item_sql = `
         stuff
     WHERE
         id = ?
+    AND
+        user_id = ?
 `
-app.get("/list/stuff/:id/delete", ( req, res ) => {
-    db.execute(delete_item_sql, [req.params.id], (error, results) => {
+app.get("/list/stuff/:id/delete", requiresAuth(), ( req, res ) => {
+    db.execute(delete_item_sql, [req.params.id, req.oidc.user.email], (error, results) => {
         if (error)
             res.status(500).send(error); //Internal Server Error
         else {
@@ -142,8 +162,10 @@ const update_item_sql = `
         description = ?
     WHERE
         id = ?
+    AND
+        user_id = ?
 `
-app.post("/list/stuff/:id", ( req, res ) => {
+app.post("/list/stuff/:id", requiresAuth(), ( req, res ) => {
     console.log(req.body);
     db.execute(update_item_sql, [req.body.homework_name, req.body.assignment_date, req.body.class_name, req.body.class_description, req.params.id], (error, results) => {
         if (error)
@@ -157,12 +179,12 @@ app.post("/list/stuff/:id", ( req, res ) => {
 // define a route for item CREATE
 const create_item_sql = `
     INSERT INTO stuff
-        (item, due_date, classes, description)
+        (item, due_date, classes, description, user_id)
     VALUES
-        (?, ?, ?, ?)
+        (?, ?, ?, ?, ?)
 `
-app.post("/list", ( req, res ) => {
-    db.execute(create_item_sql, [req.body.homework_name, req.body.assignment_date, req.body.class_name, req.body.class_description], (error, results) => {
+app.post("/list", requiresAuth(), ( req, res ) => {
+    db.execute(create_item_sql, [req.body.homework_name, req.body.assignment_date, req.body.class_name, req.body.class_description, req.oidc.user_id], (error, results) => {
         if (error)
             res.status(500).send(error); //Internal Server Error
         else {

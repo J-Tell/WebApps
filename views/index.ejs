@@ -14,6 +14,11 @@
 </head>
 <body>
     <div class="container">
+        <% if (isLoggedIn) { %>
+            <a class="red btn" href="/logout"> LOGOUT <%=user.name%>!</a>
+        <% } else { %>
+            <a class="blue btn" href="/login"> LOGIN</a>
+        <% } %>
         <h1 style="text-align: center">Welcome!</h1>
         <h2>This will help keep track of homework</h2>
         <div class="section" style="text-align: center">
