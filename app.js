@@ -7,6 +7,9 @@ const helmet = require("helmet");
 const {auth} = require('express-openid-connect');
 const {requiresAuth} = require('express-openid-connect');
 
+const dotenv = require('dotenv');
+dotenv.config();
+
 const db = require("./db/db_connection");
 app.set("views", __dirname + "/views");
 app.set("view engine", "ejs");
@@ -16,8 +19,6 @@ app.use(logger("dev")); // ??
 // define middleware that serves static resources in the public directory
 app.use(express.static(__dirname + '/public')); // ??
 
-const dotenv = require('dotenv');
-dotenv.config();
 
 
 // // Helmet middleware
@@ -115,7 +116,7 @@ AND
 
 // define a route for the item detail page
 app.get( "/list/stuff/:id", requiresAuth(), ( req, res ) => {
-    db.execute(read_item_sql, [req.params.id], (error, results) => {
+    db.execute(read_item_sql, [req.params.id, req.oidc.user.email], (error, results) => {
         if (error) {
             res.status(500).send(error); //Internal Server Error
         }
@@ -167,7 +168,7 @@ const update_item_sql = `
 `
 app.post("/list/stuff/:id", requiresAuth(), ( req, res ) => {
     console.log(req.body);
-    db.execute(update_item_sql, [req.body.homework_name, req.body.assignment_date, req.body.class_name, req.body.class_description, req.params.id], (error, results) => {
+    db.execute(update_item_sql, [req.body.homework_name, req.body.assignment_date, req.body.class_name, req.body.class_description, req.params.id, req.oidc.user.email], (error, results) => {
         if (error)
             res.status(500).send(error); //Internal Server Error
         else {
