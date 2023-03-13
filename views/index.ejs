@@ -13,12 +13,35 @@
     <link rel="stylesheet" type = "text/css" href="/stylesheets/index.css">
 </head>
 <body>
+    <header>
+        <nav>
+            <div class="nav-wrapper">
+                <a href="/" class="brand-logo">Homework Tracker</a>
+                <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                <!-- Main nav, hidden for small screens -->
+                <ul id="desktop-nav" class="right hide-on-med-and-down">
+                    <li><a href="/"><i class="material-icons left">home</i>Home</a></li>
+                    <li><a href="/list"><i class="material-icons left">list</i>Inventory</a></li>
+                    <% if (isLoggedIn) { %>
+                        <li><a class="red btn" href="/logout"> LOGOUT <%=user.name%>!</a></li>
+                    <% } else { %>
+                        <li><a class="blue btn" href="/login"> LOGIN</a></li>
+                    <% } %>
+                </ul>
+            </div>
+        </nav>
+        <!-- Mobile nav menu, shown when menu button clicked -->
+        <ul id="mobile-nav" class="sidenav">
+            <li><a href="/"><i class="material-icons left">home</i>Home</a></li>
+            <li><a href="/stuff"><i class="material-icons left">list</i>Inventory</a></li>
+            <% if (isLoggedIn) { %>
+                <li><a class="red btn" href="/logout"> LOGOUT <%=user.name%>!</a></li>
+            <% } else { %>
+                <li><a class="blue btn" href="/login"> LOGIN</a></li>
+            <% } %>
+        </ul>
+    </header>
     <div class="container">
-        <% if (isLoggedIn) { %>
-            <a class="red btn" href="/logout"> LOGOUT <%=user.name%>!</a>
-        <% } else { %>
-            <a class="blue btn" href="/login"> LOGIN</a>
-        <% } %>
         <h1 style="text-align: center">Welcome!</h1>
         <h2>This will help keep track of homework</h2>
         <div class="section" style="text-align: center">
@@ -27,7 +50,7 @@
             <i class = "material-icons right">arrow_forward</i>
         </a>
         </div>
-        <img src="/public/images/bag.png" class="center">
+        <img src="/images/bag.png" class="center">
     </div>
 </body>
 </html>
