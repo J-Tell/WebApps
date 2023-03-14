@@ -115,6 +115,8 @@ WHERE
     id = ?
 AND
     user_id = ?
+ORDER BY
+    due_date
 `
 
 // define a route for the item detail page

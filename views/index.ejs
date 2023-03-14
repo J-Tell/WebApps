@@ -30,16 +30,6 @@
                 </ul>
             </div>
         </nav>
-        <!-- Mobile nav menu, shown when menu button clicked -->
-        <ul id="mobile-nav" class="sidenav">
-            <li><a href="/"><i class="material-icons left">home</i>Home</a></li>
-            <li><a href="/stuff"><i class="material-icons left">list</i>Inventory</a></li>
-            <% if (isLoggedIn) { %>
-                <li><a class="red btn" href="/logout"> LOGOUT <%=user.name%>!</a></li>
-            <% } else { %>
-                <li><a class="blue btn" href="/login"> LOGIN</a></li>
-            <% } %>
-        </ul>
     </header>
     <div class="container">
         <h1 style="text-align: center">Welcome!</h1>
