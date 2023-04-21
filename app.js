@@ -1,4 +1,5 @@
 //set up the server
+const DEBUG = true;
 const express = require( "express" );
 const app = express();
 const port = 9145;
@@ -89,18 +90,40 @@ SELECT
     id, item, due_date
 FROM
     stuff
+JOIN subjects
+    ON stuff.subjectID = subjects.subjectID
 WHERE
     user_id = ?
+`
+
+const read_subjects_all_sql = `
+    SELECT
+        subjectID, subjectName
+    FROM
+        subjects
 `
 
 // define a route for the stuff inventory page
 app.get( "/list", requiresAuth(), ( req, res ) => {
     db.execute(read_stuff_all_sql, [req.oidc.user.email], (error,results) => {
+        if (DEBUG) {
+            console.log(error ? error : results);
+        }
         if (error) {
             res.status(500).send(error); //Internal Server Error
         }
         else {
-            res.render('list', {inventory: results});
+            db.execute(read_subjects_all_sql, (error2, results2) => {
+                if (DEBUG) {
+                    console.log(error ? error : results);
+                }
+                if (error) {
+                    res.status(500).send(error); //Internal Server Error
+                }
+                else {
+                    res.render('list', {inventory: results});
+                }
+            })
         }
     })
     // res.sendFile( __dirname + "/views/list.html" );
@@ -108,9 +131,11 @@ app.get( "/list", requiresAuth(), ( req, res ) => {
 
 const read_item_sql = `
 SELECT
-    id, item, due_date, classes, description
+    id, item, due_date, subjects.subjectName as subject, description
 FROM
     stuff
+JOIN subjects
+    ON stuff.subjectID = subjects.subjectID
 WHERE
     id = ?
 AND
@@ -126,7 +151,7 @@ app.get( "/list/stuff/:id", requiresAuth(), ( req, res ) => {
             res.status(500).send(error); //Internal Server Error
         }
         else if (results.length == 0) {
-            res.status(404).send(`No item found wiht id  = '${req.params.id}'`);
+            res.status(404).send(`No item found with id  = '${req.params.id}'`);
         } 
         else {
             // res.send(results[0]);
@@ -164,8 +189,10 @@ const update_item_sql = `
     SET
         item = ?,
         due_date = ?,
-        classes = ?,
+        subjectID = ?,
         description = ?
+    JOIN subjects
+        ON stuff.subjectID = subjects.subjectID
     WHERE
         id = ?
     AND
@@ -173,7 +200,7 @@ const update_item_sql = `
 `
 app.post("/list/stuff/:id", requiresAuth(), ( req, res ) => {
     console.log(req.body);
-    db.execute(update_item_sql, [req.body.homework_name, req.body.assignment_date, req.body.class_name, req.body.class_description, req.params.id, req.oidc.user.email], (error, results) => {
+    db.execute(update_item_sql, [req.body.homework_name, req.body.assignment_date, req.body.subjectID_name, req.body.class_description, req.params.id, req.oidc.user.email], (error, results) => {
         if (error)
             res.status(500).send(error); //Internal Server Error
         else {
@@ -185,17 +212,25 @@ app.post("/list/stuff/:id", requiresAuth(), ( req, res ) => {
 // define a route for item CREATE
 const create_item_sql = `
     INSERT INTO stuff
-        (item, due_date, classes, description, user_id)
+        (item, due_date, subjectName, description, user_id)
     VALUES
         (?, ?, ?, ?, ?)
 `
 app.post("/list", requiresAuth(), ( req, res ) => {
-    db.execute(create_item_sql, [req.body.homework_name, req.body.assignment_date, req.body.class_name, req.body.class_description, req.oidc.user.email], (error, results) => {
+    db.execute(create_item_sql, [req.body.homework_name, req.body.assignment_date, req.body.subject_name, req.body.class_description, req.oidc.user.email], (error, results) => {
         if (error)
             res.status(500).send(error); //Internal Server Error
         else {
             //results.insertId has the primary key (id) of the newly inserted element.
             res.redirect(`/list/stuff/${results.insertId}`);
+        }
+        if (DEBUG)
+            console.log(error ? error : results);
+        if (error)
+        res.status(500).send(error); //Internal Server Error
+        else {
+            let data = { hwlist : results };
+            res.render('assignments', data);
         }
     });
 })

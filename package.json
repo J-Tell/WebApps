@@ -4,7 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npx nodemon app.js",
+    "devstart": "nodemon -e js,ejs,sql,env app.js",
+    "initdb": "node db/db_init.js"
   },
   "repository": {
     "type": "git",
@@ -24,5 +26,8 @@
     "helmet": "^6.0.1",
     "morgan": "^1.10.0",
     "mysql2": "^3.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
   }
 }
