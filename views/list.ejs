@@ -94,15 +94,13 @@
                     </div>
                     <div>
                         <div class="input-field col s6">
-                        <select type="number" id="subjectInput" name="subject" required>
+                        <select type="number" id="subjectInput" name="subject_name" required>
                             <option value="" disabled selected>Choose your subject</option>
-                            <option value=1   <% if (inventory.subjectId == 1) { %> selected <% } %>> Comp Sci </option>
-                            <option value=2   <% if (inventory.subjectId == 2) { %> selected <% } %>> Math </option>
-                            <option value=3   <% if (inventory.subjectId == 3) { %> selected <% } %>> Language </option>
-                            <option value=4   <% if (inventory.subjectId == 4) { %> selected <% } %>> Music </option>
-                            <option value=5   <% if (inventory.subjectId == 5) { %> selected <% } %>> Biology </option>
-                            <option value=6   <% if (inventory.subjectId == 6) { %> selected <% } %>> History </option>
+                            <% for (let i = 0; i < subject_list.length; i++) { %>
+                                <option value=<%= subject_list[i].subjectID%>><%=subject_list[i].subjectName%></option>
+                            <% } %>
                         </select>
+                        <label for="subject_name">Subject Name:</label>
                     </div>
                     <div class="input-field col s6">
                         <label for="nameInput">Description:</label>

@@ -62,7 +62,7 @@
                 </tr>
                 <tr>
                     <th>Class:</th>
-                    <td><%=classes%></td>
+                    <td><%=subject%></td>
                 </tr>
                 <tr>
                     <th>Description:</th>
@@ -98,8 +98,13 @@
                             <input type="date" name="assignment_date" value="<%=due_date%>" data-length="32" required> 
                         </div>
                         <div class="input-field col s6">
-                            <label for="nameInput">Class Name:</label>
-                            <input type="text" name="class_name" id="nameInput" class="validate" value="<%=classes%>" data-length="32" required>
+                            <select type="number" id="subjectInput" name="subject_name" required>
+                                <option value=1   <% if (subjectID == 1) { %> selected <% } %>> Comp Sci </option>
+                                <% for (let i = 0; i < subject_list.length; i++) { %>
+                                    <option value=<%=subject_list[i].subjectID%>><%=subject_list[i].subjectName%></option>
+                                <% } %>
+                            </select>
+                            <label for="subject_name">Subject Name:</label>
                         </div>
                     </div>
                     <div class="row">

@@ -115,13 +115,14 @@ app.get( "/list", requiresAuth(), ( req, res ) => {
         else {
             db.execute(read_subjects_all_sql, (error2, results2) => {
                 if (DEBUG) {
-                    console.log(error ? error : results);
+                    console.log(error2 ? error2 : results2);
                 }
-                if (error) {
-                    res.status(500).send(error); //Internal Server Error
+                if (error2) {
+                    res.status(500).send(error2); //Internal Server Error
                 }
                 else {
-                    res.render('list', {inventory: results});
+
+                    res.render('list', {inventory: results, subject_list: results2});
                 }
             })
         }
@@ -131,7 +132,7 @@ app.get( "/list", requiresAuth(), ( req, res ) => {
 
 const read_item_sql = `
 SELECT
-    id, item, due_date, subjects.subjectName as subject, description
+    id, item, due_date, subjects.subjectName as subject, stuff.subjectID as subjectID, description
 FROM
     stuff
 JOIN subjects
@@ -191,8 +192,6 @@ const update_item_sql = `
         due_date = ?,
         subjectID = ?,
         description = ?
-    JOIN subjects
-        ON stuff.subjectID = subjects.subjectID
     WHERE
         id = ?
     AND
@@ -200,7 +199,7 @@ const update_item_sql = `
 `
 app.post("/list/stuff/:id", requiresAuth(), ( req, res ) => {
     console.log(req.body);
-    db.execute(update_item_sql, [req.body.homework_name, req.body.assignment_date, req.body.subjectID_name, req.body.class_description, req.params.id, req.oidc.user.email], (error, results) => {
+    db.execute(update_item_sql, [req.body.homework_name, req.body.assignment_date, req.body.subject_name, req.body.class_description, req.params.id, req.oidc.user.email], (error, results) => {
         if (error)
             res.status(500).send(error); //Internal Server Error
         else {
@@ -212,7 +211,7 @@ app.post("/list/stuff/:id", requiresAuth(), ( req, res ) => {
 // define a route for item CREATE
 const create_item_sql = `
     INSERT INTO stuff
-        (item, due_date, subjectName, description, user_id)
+        (item, due_date, subjectID, description, user_id)
     VALUES
         (?, ?, ?, ?, ?)
 `
@@ -224,14 +223,14 @@ app.post("/list", requiresAuth(), ( req, res ) => {
             //results.insertId has the primary key (id) of the newly inserted element.
             res.redirect(`/list/stuff/${results.insertId}`);
         }
-        if (DEBUG)
-            console.log(error ? error : results);
-        if (error)
-        res.status(500).send(error); //Internal Server Error
-        else {
-            let data = { hwlist : results };
-            res.render('assignments', data);
-        }
+        // if (DEBUG)
+        //     console.log(error ? error : results);
+        // if (error)
+        // res.status(500).send(error); //Internal Server Error
+        // else {
+        //     let data = { hwlist : results };
+        //     res.render('assignments', data);
+        // }
     });
 })
 
