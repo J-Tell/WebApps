@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classes</title>
+    <link rel="icon" type="image/x-icon" href="/public/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        body {
+            background-color: #e6c77a;
+        }
+        h1 {
+            color: #2b4b82;
+        }
+        h2 {
+            color: #5594ab;
+        }
+        th {
+            color: #4c80d9;
+        }
+        td {
+            color: #0a1680;
+        }
+        .nav-wrapper {
+            background-color: #d14115;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-wrapper">
+                <a href="/" class="brand-logo">Homework Tracker</a>
+                <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                <!-- Main nav, hidden for small screens -->
+                <ul id="desktop-nav" class="right hide-on-med-and-down">
+                    <li><a href="/"><i class="material-icons left">home</i>Home</a></li>
+                    <li><a href="/list"><i class="material-icons left">list</i>Inventory</a></li>
+                    <% if (isLoggedIn) { %>
+                        <li><a class="red btn" href="/logout"> LOGOUT <%=user.name%>!</a></li>
+                    <% } else { %>
+                        <li><a class="blue btn" href="/login"> LOGIN</a></li>
+                    <% } %>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <h1>List of Classes</h1>
+        <table>
+            <tr>
+                <th>Subject</th>
+            </th>
+            <% for (let i = 0; i < inventory.length; i++) { %>
+            <tr>
+                <td>
+                    <a class="btn-small waves-effect waves-light red" href="/subject/<%=subject_list[i].subjectID%>/delete" >
+                        <i class="material-icons right">delete</i>
+                        Delete
+                    </a>
+                </td>
+            </tr>
+            <% } %>
+
+                <div class="section">
+                    <a class="btn-small waves-effect waves-light" href="/">help me</a>
+                </div>
+        </table>
+    </div>
+
+    <div class="container">
+
+        <div class="section">
+            <h2>Add a Subject:</h2>
+            <form method="post" action="/list">
+                <div class="row">
+                    <div class="input-field col s6">
+                        <label for="nameInput">Class Name:</label>
+                        <input type="text" name="homework_name" id="nameInput" class="validate" data-length="32" required>
+                    </div>
+
+                </div>
+                <div style="text-align: center">
+                    <button class="btn waves-effect waves-light" type="submit" >
+                        <i class="material-icons right">send</i>
+                        Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script> 
+    <script src="/scripts/materializeAutoInit.js"></script>
+</body>
+</html>

@@ -4,6 +4,8 @@ const express = require( "express" );
 const app = express();
 const port = 9145;
 const logger = require("morgan");
+const path = require("path");
+const fs = require("fs");
 const helmet = require("helmet");
 const {auth} = require('express-openid-connect');
 const {requiresAuth} = require('express-openid-connect');
@@ -11,13 +13,13 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const db = require("./db/db_connection");
-app.set("views", __dirname + "/views");
+app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 
 app.use(logger("dev")); // ??
 // define middleware that serves static resources in the public directory
-app.use(express.static(__dirname + '/public')); // ??
+app.use(express.static(path.join(__dirname, 'public'))); // ??
 
 app.use(helmet({
     contentSecurityPolicy: {
@@ -50,6 +52,7 @@ app.use((req, res, next) => {
 
 // Rest of the app.use(...) middleware
 
+
 // req.isAuthenticated is provided from the auth router
 app.get('/authtest', (req, res) => {
   res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
@@ -64,14 +67,19 @@ app.get('/', (req, res) => {
     res.render('index')
 });
 
+let assignmentsRouter = require("./routes/assignments.js");
+app.use("/list", requiresAuth(), assignmentsRouter);
+
+let subjectRouter = express.Router();
+subjectRouter.use("/classes", requiresAuth(), subjectRouter);
+
+
 app.use( express.urlencoded({ extended: false }) );
 
 // start the server
 app.listen( port, () => {
     console.log(`App server listening on ${ port }. (Go to http://localhost:${ port })` );
 } );
-
-
 
 // define middleware that logs all incoming requests
 app.use((req, res, next) => {
@@ -80,163 +88,8 @@ app.use((req, res, next) => {
 } );
 
 // define a route for the default home page
+// assignmentsRouter.get( "/", requiresAuth(), ( req, res ) => {
 app.get( "/", requiresAuth(), ( req, res ) => {
     // res.sendFile( __dirname + "/views/index.html" );
     res.render("index");
 } );
-
-const read_stuff_all_sql = `
-SELECT
-    id, item, due_date
-FROM
-    stuff
-JOIN subjects
-    ON stuff.subjectID = subjects.subjectID
-WHERE
-    user_id = ?
-`
-
-const read_subjects_all_sql = `
-    SELECT
-        subjectID, subjectName
-    FROM
-        subjects
-`
-
-// define a route for the stuff inventory page
-app.get( "/list", requiresAuth(), ( req, res ) => {
-    db.execute(read_stuff_all_sql, [req.oidc.user.email], (error,results) => {
-        if (DEBUG) {
-            console.log(error ? error : results);
-        }
-        if (error) {
-            res.status(500).send(error); //Internal Server Error
-        }
-        else {
-            db.execute(read_subjects_all_sql, (error2, results2) => {
-                if (DEBUG) {
-                    console.log(error2 ? error2 : results2);
-                }
-                if (error2) {
-                    res.status(500).send(error2); //Internal Server Error
-                }
-                else {
-
-                    res.render('list', {inventory: results, subject_list: results2});
-                }
-            })
-        }
-    })
-    // res.sendFile( __dirname + "/views/list.html" );
-} );
-
-const read_item_sql = `
-SELECT
-    id, item, due_date, subjects.subjectName as subject, stuff.subjectID as subjectID, description
-FROM
-    stuff
-JOIN subjects
-    ON stuff.subjectID = subjects.subjectID
-WHERE
-    id = ?
-AND
-    user_id = ?
-ORDER BY
-    due_date
-`
-
-// define a route for the item detail page
-app.get( "/list/stuff/:id", requiresAuth(), ( req, res ) => {
-    db.execute(read_item_sql, [req.params.id, req.oidc.user.email], (error, results) => {
-        if (error) {
-            res.status(500).send(error); //Internal Server Error
-        }
-        else if (results.length == 0) {
-            res.status(404).send(`No item found with id  = '${req.params.id}'`);
-        } 
-        else {
-            // res.send(results[0]);
-            let data = results[0];
-            res.render('stuff', data);
-        }
-    })
-    // res.sendFile( __dirname + "/views/stuff.html" );
-} );
-
-// define a route for item DELETE
-const delete_item_sql = `
-    DELETE 
-    FROM
-        stuff
-    WHERE
-        id = ?
-    AND
-        user_id = ?
-`
-app.get("/list/stuff/:id/delete", requiresAuth(), ( req, res ) => {
-    db.execute(delete_item_sql, [req.params.id, req.oidc.user.email], (error, results) => {
-        if (error)
-            res.status(500).send(error); //Internal Server Error
-        else {
-            res.redirect("/list");
-        }
-    });
-})
-
-// define a route for item UPDATE
-const update_item_sql = `
-    UPDATE
-        stuff
-    SET
-        item = ?,
-        due_date = ?,
-        subjectID = ?,
-        description = ?
-    WHERE
-        id = ?
-    AND
-        user_id = ?
-`
-app.post("/list/stuff/:id", requiresAuth(), ( req, res ) => {
-    console.log(req.body);
-    db.execute(update_item_sql, [req.body.homework_name, req.body.assignment_date, req.body.subject_name, req.body.class_description, req.params.id, req.oidc.user.email], (error, results) => {
-        if (error)
-            res.status(500).send(error); //Internal Server Error
-        else {
-            res.redirect(`/list/stuff/${req.params.id}`);
-        }
-    });
-})
-
-// define a route for item CREATE
-const create_item_sql = `
-    INSERT INTO stuff
-        (item, due_date, subjectID, description, user_id)
-    VALUES
-        (?, ?, ?, ?, ?)
-`
-app.post("/list", requiresAuth(), ( req, res ) => {
-    db.execute(create_item_sql, [req.body.homework_name, req.body.assignment_date, req.body.subject_name, req.body.class_description, req.oidc.user.email], (error, results) => {
-        if (error)
-            res.status(500).send(error); //Internal Server Error
-        else {
-            //results.insertId has the primary key (id) of the newly inserted element.
-            res.redirect(`/list/stuff/${results.insertId}`);
-        }
-        // if (DEBUG)
-        //     console.log(error ? error : results);
-        // if (error)
-        // res.status(500).send(error); //Internal Server Error
-        // else {
-        //     let data = { hwlist : results };
-        //     res.render('assignments', data);
-        // }
-    });
-})
-
-// const insert_stuff_table_sql = `
-//     INSERT INTO stuff
-//         (item, due_date)
-//     VALUES
-//         (?, ?)
-// `
