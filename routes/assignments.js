@@ -1,7 +1,7 @@
 const DEBUG = true;
 
 const express = require( "express" );
-const db = require("../db/db_connection");
+const db = require("../db/db_pool_promise");
 const path = require("path");
 const fs = require("fs");
 const {auth} = require('express-openid-connect');
@@ -14,31 +14,23 @@ const read_stuff_all_sql = fs.readFileSync(path.join("db", "queries", "init", "r
 const read_subjects_all_sql = fs.readFileSync(path.join("db", "queries", "crud", "read_subjects_all_sql.sql"),{encoding : "UTF-8"});
 
 // define a route for the stuff inventory page
-assignmentsRouter.get( "/", requiresAuth(), ( req, res ) => {
-    db.execute(read_stuff_all_sql, [req.oidc.user.email], (error,results) => {
+assignmentsRouter.get( "/", requiresAuth(), async ( req, res ) => {
+    let readAssignmentPromise = db.execute(read_stuff_all_sql, [req.oidc.user.email]);
+    let readSubjectsPromise = db.execute(read_stuff_all_sql, [req.oidc.user.email]);
+    
+    try {
+        let [[results,fields],[results2,fields2]] = await Promise.all([readAssignmentPromise, readSubjectsPromise])
         if (DEBUG) {
-            console.log(error ? error : results);
+            console.log(results);
+            console.log(results2);
         }
-        if (error) {
-            res.status(500).send(error); //Internal Server Error
-        }
-        else {
-            db.execute(read_subjects_all_sql, (error2, results2) => {
-                if (DEBUG) {
-                    console.log(error2 ? error2 : results2);
-                }
-                if (error2) {
-                    res.status(500).send(error2); //Internal Server Error
-                }
-                else {
-
-                    res.render('list', {inventory: results, subject_list: results2});
-                }
-            })
-        }
-    })
-    // res.sendFile( __dirname + "/views/list.html" );
-} );
+        let data = { hwlist: results, subjectlist: results2};
+        res.render('assignments', data);
+    } catch (error) {
+        if (DEBUG) console.log(error);
+        res.status(500).send(error);
+    }
+});
 
 const read_item_sql = fs.readFileSync(path.join("db", "queries", "init", "read_item_sql.sql"),{encoding : "UTF-8"});
 
@@ -54,7 +46,16 @@ assignmentsRouter.get( "/stuff/:id", requiresAuth(), ( req, res ) => {
         else {
             // res.send(results[0]);
             let data = results[0];
-            res.render('stuff', data);
+            res.render('stuff', {inventory: data});
+            // res.render('stuff', data);
+            db.execute(read_subjects_all_sql, (error2, results2) => {
+                if (error2) {
+                    res.status(500).send(error2); //Internal Server Error
+                }
+                else {
+                    res.render('stuff', {inventory: results2, subject_list: results2});
+                }
+            })
         }
     })
     // res.sendFile( __dirname + "/views/stuff.html" );

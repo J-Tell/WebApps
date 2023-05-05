@@ -9,15 +9,17 @@ let subjectRouter = express.Router();
 
 const read_subjects_all_alphabet_sql = fs.readFileSync(path.join(__dirname, "db", "queries", "crud", "read_subjects_all_alphabet_sql.sql"),{encoding : "UTF-8"});
 
-subjectRouter.get('/', requiresAuth(), (req, res) =>  {
+subjectRouter.get('/', requiresAuth(), async (req, res) =>  {
     let queryPromise = db.execute(read_subjects_all_alphabet_sql, [req.oidc.user.sub]);
-    queryPromise.then(([results, fields]) => {
-        if (DEBUG) console.log(resuts);
+    try {
+        let [results, fields] = await queryPromise;
+        if (DEBUG) console.log(results);
         res.render("subjects", {subjectlist: results});
-    }).catch ((error) => {
+
+    } catch (error) {
         if (DEBUG) console.log(error);
         res.status(500).send(error);
-    })
+    }
 })
 
 const create_subject_sql = fs.readFileSync(path.join(__dirname, "db", "queries", "crud", "create_subject_sql.sql"),{encoding : "UTF-8"});

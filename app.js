@@ -16,6 +16,9 @@ const db = require("./db/db_connection");
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
+// Configure Express to parse URL-encoded POST request bodies (forms)
+app.use( express.urlencoded({ extended: false }) );
+
 
 app.use(logger("dev")); // ??
 // define middleware that serves static resources in the public directory
